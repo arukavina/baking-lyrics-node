@@ -8,9 +8,10 @@ branches:
   only:
     - master
 before_script:
-  - 
+  - npm install
 script:
-  -
+  - node app.js &
+  - npm test
 before_deploy:
   - zip -r latest *
   - mkdir -p dpl_cd_upload
@@ -36,4 +37,4 @@ deploy:
     region: "us-east-1"
 on: *1
 after_deploy:
-  - node app.js
+  - forever start app.js
