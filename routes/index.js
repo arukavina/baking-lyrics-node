@@ -1,5 +1,4 @@
 var express = require('express')
-var request = require('request')
 var http = require('http');
 
 var router = express.Router()
@@ -10,9 +9,10 @@ const upResponse = (req, res) => {
 
 const getArtists = (callback, resp) => {
   const { filter } = callback.query
+  
   const url = filter
-    ? `http://ai.bakinglyrics.com:8080/api/v1/artists/search/${filter}`
-    : 'http://ai.bakinglyrics.com:8080/api/v1/artists/?page=1&per_page=10'
+    ? `${process.env.API_URL}/api/v1/artists/search/${filter}`
+    : `${process.env.API_URL}/api/v1/artists/?page=1&per_page=10`
   return http.get(url, (res) => {
 
     const { statusCode } = res;
@@ -41,7 +41,6 @@ const getArtists = (callback, resp) => {
     res.on('end', () => {
       try {
         const parsedData = JSON.parse(rawData);
-        console.log(parsedData);
         return resp.status(200).send(parsedData)
       } catch (e) {
         console.error(e.message);
@@ -49,6 +48,7 @@ const getArtists = (callback, resp) => {
     });
   }).on('error', (e) => {
     console.error(`Got error: ${e.message}`);
+    return resp.status(500).send('Error trying to connect to the server')
   });
 
 }
@@ -56,19 +56,15 @@ const getArtists = (callback, resp) => {
 const generateSong = (callback, resp) => {
   const { seed, number_words, artist_id } = callback.query
   if (!seed || !number_words || !artist_id) return resp.status(400).send({error: 'Missing parameter'})
-  const url = `http://ai.bakinglyrics.com:8080/api/v1/artificial_songs/generate/en/${seed}/${number_words}/artist/${artist_id}/`
-
+  const url = `${process.env.API_URL}/api/v1/artificial_songs/generate/en/${seed}/${number_words}/artist/${artist_id}/`
   return get(url, { seed, number_words, artist_id }, resp)
-
 }
 
 const getGeneratedSong = (callback, resp) => {
   const { artificial_song_id } = callback.query
   if (!artificial_song_id) return resp.status(400).send({error: 'Missing parameter'})
-  const url = `http://ai.bakinglyrics.com:8080/api/v1/artificial_songs/${artificial_song_id}`
-
+  const url = `${process.env.API_URL}/api/v1/artificial_songs/${artificial_song_id}`
   return get(url, {artificial_song_id}, resp)
-
 }
 
 const get = (url, query, resp) => {
@@ -106,11 +102,12 @@ const get = (url, query, resp) => {
     });
   }).on('error', (e) => {
     console.error(`Got error: ${e.message}`);
+    return resp.status(500).send('Error trying to connect to the server')
   });
 
 }
 
-router.get('/', upResponse)
+router.get('/health', upResponse)
 router.get('/artists', getArtists)
 router.get('/generate', generateSong)
 router.get('/generated-song', getGeneratedSong)
