@@ -15,6 +15,11 @@ const getArtists = (callback, resp) => {
   return get(url, resp)
 }
 
+const getRandomArtists = (callback, resp) => {
+  const url = `${process.env.API_URL}/api/v1/artists/random/20`
+  return get(url, resp)
+}
+
 const generateSong = (callback, resp) => {
   const { seed, number_words, artist_id } = callback.query
   if (!seed || !number_words || !artist_id) return resp.status(400).send({error: 'Missing parameter'})
@@ -39,6 +44,7 @@ const get = (url, resp) => fetch(url)
 
 router.get('/health', upResponse)
 router.get('/artists', getArtists)
+router.get('/artists/random', getRandomArtists)
 router.get('/generate', generateSong)
 router.get('/generated-song', getGeneratedSong)
 
