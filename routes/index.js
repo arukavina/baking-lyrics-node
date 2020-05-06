@@ -7,6 +7,8 @@ const upResponse = (req, res) => {
   return res.status(200).send('Server Up!')
 }
 
+const ping = (req, resp) => get(`${process.env.API_URL}/api/v1/general/ping`, resp)
+
 const getArtists = (callback, resp) => {
   const { filter } = callback.query
   const url = filter
@@ -43,6 +45,7 @@ const get = (url, resp) => fetch(url)
     })
 
 router.get('/health', upResponse)
+router.get('/ping', ping)
 router.get('/artists', getArtists)
 router.get('/artists/random', getRandomArtists)
 router.get('/generate', generateSong)
